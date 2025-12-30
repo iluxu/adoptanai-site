@@ -118,6 +118,7 @@ const parseExpertAnalysis = (text) => {
 };
 
 const renderExpertGrid = (parsed) => {
+  if (!els.expertGrid) return;
   const cards = SPECIALISTS.filter((item) => parsed[item.key]).map((item) => {
     return `
       <div class="expert-card">
@@ -162,6 +163,14 @@ const renderAnalysis = (analysis, matchLabel) => {
   els.expertText.textContent = expert;
   renderExpertGrid(parsed);
   renderWarnings(analysis?.data_quality_warnings || []);
+};
+
+const renderExpertProgress = (panel) => {
+  if (!panel) return;
+  renderExpertGrid(panel);
+  if (panel.Selector && els.analysisSummary.textContent === "Analyse en cours...") {
+    els.analysisSummary.textContent = panel.Selector;
+  }
 };
 
 const buildMatchCard = (fixture) => {
@@ -247,18 +256,48 @@ const analyzeFixture = async (fixture) => {
   };
 
   try {
-    const response = await fetch(`${API_BASE}/match-analysis`, {
+    const response = await fetch(`${API_BASE}/match-analysis/live`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const analysis = await response.json();
-    renderAnalysis(analysis, matchLabel);
-    if (state.spotlight && fixture.fixture.id === state.spotlight.fixture.id) {
-      updateSpotlight(analysis);
-    }
-    showToast("Analyse terminee");
+    const job = await response.json();
+    const jobId = job.job_id;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/match-analysis/live/${jobId}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.panel) renderExpertProgress(data.panel);
+
+        if (data.status === "done") {
+          renderAnalysis(data.result, matchLabel);
+          if (state.spotlight && fixture.fixture.id === state.spotlight.fixture.id) {
+            updateSpotlight(data.result);
+          }
+          showToast("Analyse terminee");
+          setBusy(false);
+          return;
+        }
+        if (data.status === "error") {
+          throw new Error(data.error || "Analyse echouee.");
+        }
+        setTimeout(poll, 2000);
+      } catch (err) {
+        console.error(err);
+        els.analysisSummary.textContent = "Erreur pendant l'analyse. Reessaye plus tard.";
+        els.expertText.textContent = "--";
+        if (els.expertGrid) {
+          els.expertGrid.innerHTML = "<div class=\"expert-empty\">Aucune analyse disponible.</div>";
+        }
+        showToast("Erreur d'analyse");
+        setBusy(false);
+      }
+    };
+
+    setTimeout(poll, 1500);
   } catch (err) {
     console.error(err);
     els.analysisSummary.textContent = "Erreur pendant l'analyse. Reessaye plus tard.";
@@ -267,8 +306,6 @@ const analyzeFixture = async (fixture) => {
       els.expertGrid.innerHTML = "<div class=\"expert-empty\">Aucune analyse disponible.</div>";
     }
     showToast("Erreur d'analyse");
-  } finally {
-    setBusy(false);
   }
 };
 
