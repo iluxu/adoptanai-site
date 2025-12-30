@@ -19,6 +19,7 @@ const els = {
   expertText: document.getElementById("expertText"),
   warningsBlock: document.getElementById("warningsBlock"),
   warningsList: document.getElementById("warningsList"),
+  expertGrid: document.getElementById("expertGrid"),
   spotlightTitle: document.getElementById("spotlightTitle"),
   spotlightStatus: document.getElementById("spotlightStatus"),
   spotlightHome: document.getElementById("spotlightHome"),
@@ -29,6 +30,16 @@ const els = {
 };
 
 const API_BASE = "/api";
+const SPECIALISTS = [
+  { key: "Specialist-Model", label: "Modele" },
+  { key: "Specialist-Form", label: "Forme" },
+  { key: "Specialist-Tactics", label: "Tactique" },
+  { key: "Specialist-Market", label: "Marche" },
+  { key: "Specialist-Players-Home", label: "Joueurs domicile" },
+  { key: "Specialist-Players-Away", label: "Joueurs exterieur" },
+  { key: "Specialist-Players-League", label: "Joueurs ligue" },
+  { key: "Specialist-Players", label: "Joueurs" },
+];
 
 const formatPercent = (value) => {
   if (value === null || value === undefined) return "--";
@@ -93,14 +104,52 @@ const renderWarnings = (warnings) => {
   els.warningsList.innerHTML = warnings.map((item) => `<li>${item}</li>`).join("");
 };
 
+const parseExpertAnalysis = (text) => {
+  if (!text) return {};
+  const parsed = {};
+  text.split("\n").forEach((line) => {
+    const idx = line.indexOf(":");
+    if (idx === -1) return;
+    const key = line.slice(0, idx).trim();
+    const value = line.slice(idx + 1).trim();
+    if (key && value) parsed[key] = value;
+  });
+  return parsed;
+};
+
+const renderExpertGrid = (parsed) => {
+  const cards = SPECIALISTS.filter((item) => parsed[item.key]).map((item) => {
+    return `
+      <div class="expert-card">
+        <h5>${item.label}</h5>
+        <p>${parsed[item.key]}</p>
+      </div>
+    `;
+  });
+
+  const presenter = parsed.Presenter
+    ? `<div class="expert-card"><h5>Presenter</h5><p>${parsed.Presenter}</p></div>`
+    : "";
+
+  if (!cards.length && !presenter) {
+    els.expertGrid.innerHTML = "<div class=\"expert-empty\">Panel d'experts en attente.</div>";
+    return;
+  }
+
+  els.expertGrid.innerHTML = presenter + cards.join("");
+};
+
 const renderAnalysis = (analysis, matchLabel) => {
   els.analysisTitle.textContent = matchLabel;
   const probs = analysis?.predictions?.poisson_model?.["1x2_probabilities"] || {};
   const expected = analysis?.predictions?.poisson_model?.expected_goals || {};
   const score = analysis?.predictions?.poisson_model?.most_likely_score || [];
   const expert = analysis?.expert_analysis || "Analyse IA indisponible.";
+  const parsed = parseExpertAnalysis(expert);
+  const finalAdvice = parsed.Selector || parsed.Conseil || parsed.Final || "";
 
-  els.analysisSummary.textContent = analysis?.predictions?.api_sport?.advice ||
+  els.analysisSummary.textContent = finalAdvice ||
+    analysis?.predictions?.api_sport?.advice ||
     analysis?.predictions?.api_sport?.prediction ||
     "Predictions basees sur le modele Poisson et les statistiques recentes.";
 
@@ -111,6 +160,7 @@ const renderAnalysis = (analysis, matchLabel) => {
   els.xgAway.textContent = expected.away ?? "--";
   els.likelyScore.textContent = score.length === 2 ? `${score[0]} - ${score[1]}` : "--";
   els.expertText.textContent = expert;
+  renderExpertGrid(parsed);
   renderWarnings(analysis?.data_quality_warnings || []);
 };
 
@@ -183,6 +233,9 @@ const analyzeFixture = async (fixture) => {
   els.analysisTitle.textContent = matchLabel;
   els.analysisSummary.textContent = "Analyse en cours...";
   els.expertText.textContent = "Chargement...";
+  if (els.expertGrid) {
+    els.expertGrid.innerHTML = "<div class=\"expert-empty\">Analyse en cours...</div>";
+  }
 
   const payload = {
     competition_id: String(fixture.league.id),
@@ -210,6 +263,9 @@ const analyzeFixture = async (fixture) => {
     console.error(err);
     els.analysisSummary.textContent = "Erreur pendant l'analyse. Reessaye plus tard.";
     els.expertText.textContent = "--";
+    if (els.expertGrid) {
+      els.expertGrid.innerHTML = "<div class=\"expert-empty\">Aucune analyse disponible.</div>";
+    }
     showToast("Erreur d'analyse");
   } finally {
     setBusy(false);
@@ -226,7 +282,15 @@ const loadSample = () => {
       },
       api_sport: { advice: "Victoire domicile avec prudence." },
     },
-    expert_analysis: "Le modele met en avant une domination territoriale de l'equipe a domicile avec un pressing haut et une efficacite offensive recente."
+    expert_analysis: [
+      "Presenter: Analyse multi-angles basee sur les donnees du jour.",
+      "Specialist-Model: Avantage domicile sur la distribution des buts.",
+      "Specialist-Form: Equipe domicile en dynamique positive, defense stable.",
+      "Specialist-Tactics: Pressing haut et couloirs exploites, match controle.",
+      "Specialist-Market: Cotes encore jouables, edge modere.",
+      "Specialist-Players: Effectif domicile plus complet, impact key players.",
+      "Selector: Victoire domicile ou 1X en couverture.",
+    ].join("\\n"),
   };
   renderAnalysis(sample, "Exemple: Lyon vs Marseille");
   updateSpotlight(sample);

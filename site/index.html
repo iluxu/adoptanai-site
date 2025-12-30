@@ -5,7 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AdoptanAI - Agents multi-sports</title>
     <meta name="description" content="AdoptanAI, plateforme multi-agents. Football disponible aujourd'hui." />
+    <meta name="robots" content="index,follow" />
+    <meta property="og:title" content="AdoptanAI - Agents multi-sports" />
+    <meta property="og:description" content="Predictions sportives multi-agents avec RunMesh. Football live, autres sports en preparation." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://adoptan.ai/" />
+    <meta property="og:site_name" content="AdoptanAI" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="https://adoptan.ai/" />
     <link rel="stylesheet" href="./styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "AdoptanAI",
+        "url": "https://adoptan.ai/",
+        "description": "Plateforme multi-agents de predictions sportives avec analyses RunMesh.",
+        "publisher": {
+          "@type": "Organization",
+          "name": "AdoptanAI",
+          "url": "https://adoptan.ai/"
+        }
+      }
+    </script>
   </head>
   <body>
     <div class="bg">
@@ -142,9 +164,9 @@
               <div class="analysis-status" id="analysisStatus">Pret</div>
             </div>
             <div class="analysis-body">
-              <div class="analysis-block">
-                <h4>Resume</h4>
-                <p id="analysisSummary">Selectionne un match pour afficher la prediction principale.</p>
+              <div class="analysis-block highlight">
+                <h4>Conseil final</h4>
+                <p id="analysisSummary">Selectionne un match pour afficher la recommandation finale.</p>
               </div>
               <div class="analysis-block">
                 <h4>Probabilites 1X2</h4>
@@ -163,7 +185,11 @@
                 </div>
               </div>
               <div class="analysis-block">
-                <h4>Analyse experte</h4>
+                <h4>Panel d'experts</h4>
+                <div class="expert-grid" id="expertGrid"></div>
+              </div>
+              <div class="analysis-block">
+                <h4>Texte complet</h4>
                 <pre id="expertText">--</pre>
               </div>
               <div class="analysis-block warnings" id="warningsBlock">
@@ -172,6 +198,27 @@
               </div>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section class="method">
+        <div class="section-title">
+          <h2>Methodologie RunMesh</h2>
+          <p>Une lecture claire des donnees, des modeles et des risques pour des decisions plus lucides.</p>
+        </div>
+        <div class="method-grid">
+          <div class="method-card">
+            <h3>Donnees du jour</h3>
+            <p>Fixtures, forme recente, rankings et statistiques equipe/ligue pour contextualiser chaque match.</p>
+          </div>
+          <div class="method-card">
+            <h3>Panel specialise</h3>
+            <p>Modeles, tactique, marche et joueurs livrent chacun leur angle avant la synthese finale.</p>
+          </div>
+          <div class="method-card">
+            <h3>Sorties structurees</h3>
+            <p>Probabilites 1X2, xG, score probable et conseil final pour faciliter le passage a l'action.</p>
+          </div>
         </div>
       </section>
     </main>
