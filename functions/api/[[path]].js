@@ -10,6 +10,7 @@ export async function onRequest(context) {
   const targetUrl = new URL(origin);
   targetUrl.pathname = incomingUrl.pathname;
   targetUrl.search = incomingUrl.search;
+  const isLive = incomingUrl.pathname.startsWith("/api/match-analysis/live");
 
   const init = {
     method: request.method,
@@ -21,7 +22,7 @@ export async function onRequest(context) {
     init.body = request.body;
   }
 
-  if (request.method === "GET") {
+  if (request.method === "GET" && !isLive) {
     const cacheKey = new Request(targetUrl.toString(), request);
     const cache = caches.default;
     const cached = await cache.match(cacheKey);
@@ -34,5 +35,11 @@ export async function onRequest(context) {
     return proxyResponse;
   }
 
-  return fetch(targetUrl, init);
+  const response = await fetch(targetUrl, init);
+  if (isLive && request.method === "GET") {
+    const noStore = new Response(response.body, response);
+    noStore.headers.set("Cache-Control", "no-store");
+    return noStore;
+  }
+  return response;
 }
