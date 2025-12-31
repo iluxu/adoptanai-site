@@ -1,26 +1,29 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AdoptanAI - Agents multi-sports</title>
-    <meta name="description" content="AdoptanAI, plateforme multi-agents. Football disponible aujourd'hui." />
+    <title>AdoptanAI - Multi-Agent Sports Intelligence</title>
+    <meta name="description" content="AdoptanAI is a multi-agent sports intelligence hub. Football live today, more sports coming soon." />
     <meta name="robots" content="index,follow" />
-    <meta property="og:title" content="AdoptanAI - Agents multi-sports" />
-    <meta property="og:description" content="Predictions sportives multi-agents avec RunMesh. Football live, autres sports en preparation." />
+    <meta property="og:title" content="AdoptanAI - Multi-Agent Sports Intelligence" />
+    <meta property="og:description" content="Real-time match insights powered by RunMesh. Football live, more sports on deck." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://adoptan.ai/" />
     <meta property="og:site_name" content="AdoptanAI" />
     <meta name="twitter:card" content="summary" />
     <link rel="canonical" href="https://adoptan.ai/" />
-    <link rel="stylesheet" href="./styles.css?v=20251230" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=20251231" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "AdoptanAI",
         "url": "https://adoptan.ai/",
-        "description": "Plateforme multi-agents de predictions sportives avec analyses RunMesh.",
+        "description": "Multi-agent sports intelligence platform with live football analysis.",
         "publisher": {
           "@type": "Organization",
           "name": "AdoptanAI",
@@ -31,9 +34,9 @@
   </head>
   <body>
     <div class="bg">
-      <div class="glow glow-a"></div>
-      <div class="glow glow-b"></div>
-      <div class="grain"></div>
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+      <div class="grid"></div>
     </div>
 
     <header class="hero">
@@ -42,52 +45,67 @@
           <span class="brand-mark">AA</span>
           <div>
             <div class="brand-title">AdoptanAI</div>
-            <div class="brand-sub">Multi-agent intelligence</div>
+            <div class="brand-sub">Multi-agent sports intelligence</div>
           </div>
         </div>
         <div class="nav-actions">
-          <button class="ghost" id="refreshBtn">Rafraichir les matchs</button>
-          <a class="cta" href="#football">Ouvrir l'agent football</a>
+          <span class="badge">100% free</span>
+          <button class="ghost" id="refreshBtn">Refresh matches</button>
+          <a class="cta" href="#football">Open Football Agent</a>
         </div>
       </nav>
 
       <div class="hero-content">
         <div class="hero-text">
           <div class="chip">RunMesh inside</div>
-          <h1>Un hub multi-agents pour tous vos sports.</h1>
+          <h1>One hub. Many agents. Zero noise.</h1>
           <p>
-            AdoptanAI connecte des agents specialises pour transformer les donnees en
-            predictions actionnables. Le football est live, les autres arrivent.
+            AdoptanAI blends model signals, tactical reads, and market context into
+            a single match brief. Football is live today. More sports are next.
           </p>
           <div class="hero-actions">
-            <button class="primary" id="analyzeFirstBtn">Analyser le match du jour</button>
-            <button class="ghost" id="openSampleBtn">Voir un exemple</button>
+            <button class="primary" id="analyzeFirstBtn">Run today&apos;s match</button>
+            <button class="ghost" id="openSampleBtn">See a sample</button>
+          </div>
+          <div class="hero-stats">
+            <div>
+              <span>Live agents</span>
+              <strong>1</strong>
+            </div>
+            <div>
+              <span>Sports roadmap</span>
+              <strong>8+</strong>
+            </div>
+            <div>
+              <span>Pricing</span>
+              <strong>Free</strong>
+            </div>
           </div>
         </div>
         <div class="hero-card">
           <div class="card-header">
             <div>
-              <div class="eyebrow">Focus agent football</div>
-              <div class="match-title" id="spotlightTitle">Chargement...</div>
+              <div class="eyebrow">Football spotlight</div>
+              <div class="match-title" id="spotlightTitle">Loading...</div>
             </div>
-            <div class="status" id="spotlightStatus">En attente</div>
+            <div class="status" id="spotlightStatus">Standby</div>
           </div>
           <div class="card-body">
             <div class="stat">
-              <span>Prob. domicile</span>
+              <span>Home win</span>
               <strong id="spotlightHome">--</strong>
             </div>
             <div class="stat">
-              <span>Prob. nul</span>
+              <span>Draw</span>
               <strong id="spotlightDraw">--</strong>
             </div>
             <div class="stat">
-              <span>Prob. exterieur</span>
+              <span>Away win</span>
               <strong id="spotlightAway">--</strong>
             </div>
           </div>
           <div class="card-footer">
-            <div class="note" id="spotlightNote">Selection auto sur le premier match disponible.</div>
+            <div class="note" id="spotlightNote">Auto-picking the first match available.</div>
           </div>
         </div>
       </div>
@@ -96,104 +114,112 @@
     <main>
       <section class="agents">
         <div class="section-title">
-          <h2>Agents disponibles</h2>
-          <p>Une seule interface, plusieurs agents specialises. Le football est actif.</p>
+          <h2>Agent lineup</h2>
+          <p>The core suite for serious bettors. Football live, the rest shipping soon.</p>
         </div>
         <div class="agent-grid">
           <div class="agent-card active">
             <div class="agent-name">Football</div>
-            <p>Predictions, probabilites et analyse multi-agents pour chaque match du jour.</p>
-            <span class="agent-tag">En direct</span>
+            <p>Predictions, probabilities, and multi-panel synthesis for each fixture.</p>
+            <span class="agent-tag">Live</span>
           </div>
           <div class="agent-card muted">
-            <div class="agent-name">Basket</div>
-            <p>Projections avancees, rythme et impact joueurs.</p>
-            <span class="agent-tag">Bientot</span>
+            <div class="agent-name">Basketball</div>
+            <p>Pace, player impact, and late lineup signals.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
             <div class="agent-name">Tennis</div>
-            <p>Surface, forme, et lecture des confrontations.</p>
-            <span class="agent-tag">Bientot</span>
+            <p>Surface, form streaks, and matchup volatility.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
             <div class="agent-name">Rugby</div>
-            <p>Momentum, discipline, et analyse des packs.</p>
-            <span class="agent-tag">Bientot</span>
+            <p>Discipline, pack dominance, and kicking edge.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
-            <div class="agent-name">Hockey sur glace</div>
-            <p>Special teams, gardiens, et intensite.</p>
-            <span class="agent-tag">Bientot</span>
+            <div class="agent-name">Ice Hockey</div>
+            <p>Special teams, goalie impact, and pace swings.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
             <div class="agent-name">Baseball</div>
-            <p>Pitchers, alignements, et matchups.</p>
-            <span class="agent-tag">Bientot</span>
+            <p>Pitcher matchups, bullpen stress, and splits.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
-            <div class="agent-name">MMA / Boxe</div>
-            <p>Styles, cardio, et gestion des rounds.</p>
-            <span class="agent-tag">Bientot</span>
+            <div class="agent-name">MMA / Boxing</div>
+            <p>Style clashes, cardio, and round control.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
-            <div class="agent-name">Formule 1</div>
-            <p>Qualifs, strategy, et perf par circuit.</p>
-            <span class="agent-tag">Bientot</span>
+            <div class="agent-name">Formula 1</div>
+            <p>Strategy sims, tire windows, and circuit fit.</p>
+            <span class="agent-tag">Soon</span>
           </div>
           <div class="agent-card muted">
             <div class="agent-name">Esports</div>
-            <p>Meta, drafts, et lecture de momentum.</p>
-            <span class="agent-tag">Bientot</span>
+            <p>Draft edges, meta reads, and momentum shifts.</p>
+            <span class="agent-tag">Soon</span>
           </div>
         </div>
       </section>
 
       <section class="matchs" id="football">
         <div class="section-title">
-          <h2>Agent Football</h2>
-          <p id="fixturesMeta">Chargement des fixtures...</p>
+          <h2>Football agent</h2>
+          <p id="fixturesMeta">Loading fixtures...</p>
         </div>
         <div class="matchs-layout">
           <div class="matchs-list" id="fixturesList"></div>
           <aside class="analysis" id="analysisPanel">
             <div class="analysis-header">
               <div>
-                <div class="eyebrow">Analyse RunMesh</div>
-                <h3 id="analysisTitle">Aucune analyse lancee</h3>
+                <div class="eyebrow">Live analyst desk</div>
+                <h3 id="analysisTitle">No analysis yet</h3>
               </div>
-              <div class="analysis-status" id="analysisStatus">Pret</div>
+              <div class="analysis-status">
+                <span id="analysisStatus">Ready</span>
+                <span class="spinner" id="analysisSpinner" aria-hidden="true"></span>
+              </div>
             </div>
             <div class="analysis-body">
               <div class="analysis-block highlight">
-                <h4>Conseil final</h4>
-                <p id="analysisSummary">Selectionne un match pour afficher la recommandation finale.</p>
+                <h4>Final call</h4>
+                <p id="analysisSummary">Pick a match to generate the final lean.</p>
               </div>
               <div class="analysis-block">
-                <h4>Probabilites 1X2</h4>
+                <h4>1X2 probabilities</h4>
                 <div class="prob-grid">
-                  <div><span>Domicile</span><strong id="probHome">--</strong></div>
-                  <div><span>Nul</span><strong id="probDraw">--</strong></div>
-                  <div><span>Exterieur</span><strong id="probAway">--</strong></div>
+                  <div><span>Home</span><strong id="probHome">--</strong></div>
+                  <div><span>Draw</span><strong id="probDraw">--</strong></div>
+                  <div><span>Away</span><strong id="probAway">--</strong></div>
                 </div>
               </div>
               <div class="analysis-block">
-                <h4>Details</h4>
+                <h4>Score context</h4>
                 <div class="detail-grid">
-                  <div><span>xG domicile</span><strong id="xgHome">--</strong></div>
-                  <div><span>xG exterieur</span><strong id="xgAway">--</strong></div>
-                  <div><span>Score le + probable</span><strong id="likelyScore">--</strong></div>
+                  <div><span>xG home</span><strong id="xgHome">--</strong></div>
+                  <div><span>xG away</span><strong id="xgAway">--</strong></div>
+                  <div><span>Likely score</span><strong id="likelyScore">--</strong></div>
                 </div>
               </div>
               <div class="analysis-block">
-                <h4>Panel d'experts</h4>
+                <h4>Expert panel (live)</h4>
                 <div class="expert-grid" id="expertGrid"></div>
               </div>
               <div class="analysis-block">
-                <h4>Texte complet</h4>
+                <h4>Full transcript</h4>
                 <pre id="expertText">--</pre>
               </div>
+              <div class="analysis-block">
+                <h4>Share the take</h4>
+                <p id="tweetText">Generate an analysis to unlock your shareable tweet.</p>
+                <a class="tweet" id="tweetLink" href="https://x.com/intent/tweet" target="_blank" rel="noreferrer">Post to X</a>
+              </div>
               <div class="analysis-block warnings" id="warningsBlock">
-                <h4>Alertes donnees</h4>
+                <h4>Data alerts</h4>
                 <ul id="warningsList"></ul>
               </div>
             </div>
@@ -203,35 +229,35 @@
 
       <section class="method">
         <div class="section-title">
-          <h2>Methodologie RunMesh</h2>
-          <p>Une lecture claire des donnees, des modeles et des risques pour des decisions plus lucides.</p>
+          <h2>How AdoptanAI works</h2>
+          <p>Structured data, multi-agent debate, and a final call designed for clarity.</p>
         </div>
         <div class="method-grid">
           <div class="method-card">
-            <h3>Donnees du jour</h3>
-            <p>Fixtures, forme recente, rankings et statistiques equipe/ligue pour contextualiser chaque match.</p>
+            <h3>Match data first</h3>
+            <p>Fixtures, form, standings, and xG signals create the baseline for each game.</p>
           </div>
           <div class="method-card">
-            <h3>Panel specialise</h3>
-            <p>Modeles, tactique, marche et joueurs livrent chacun leur angle avant la synthese finale.</p>
+            <h3>Specialist panel</h3>
+            <p>Model, form, tactics, market, and players each deliver a concise angle.</p>
           </div>
           <div class="method-card">
-            <h3>Sorties structurees</h3>
-            <p>Probabilites 1X2, xG, score probable et conseil final pour faciliter le passage a l'action.</p>
+            <h3>Clean output</h3>
+            <p>Probabilities, likely score, and a single final lean you can act on.</p>
           </div>
         </div>
       </section>
     </main>
 
     <footer class="footer">
-      <div>AdoptanAI - plateforme multi-agents propulsee par RunMesh</div>
+      <div>AdoptanAI - powered by RunMesh, free for everyone.</div>
       <div class="footer-links">
         <span>API: /api/fixtures/today</span>
-        <span>API: /api/match-analysis</span>
+        <span>API: /api/match-analysis/live</span>
       </div>
     </footer>
 
     <div class="toast" id="toast"></div>
-    <script src="./app.js?v=20251230"></script>
+    <script src="./app.js?v=20251231"></script>
   </body>
 </html>

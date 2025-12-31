@@ -10,6 +10,7 @@ const els = {
   analysisTitle: document.getElementById("analysisTitle"),
   analysisStatus: document.getElementById("analysisStatus"),
   analysisSummary: document.getElementById("analysisSummary"),
+  analysisSpinner: document.getElementById("analysisSpinner"),
   probHome: document.getElementById("probHome"),
   probDraw: document.getElementById("probDraw"),
   probAway: document.getElementById("probAway"),
@@ -26,19 +27,22 @@ const els = {
   spotlightDraw: document.getElementById("spotlightDraw"),
   spotlightAway: document.getElementById("spotlightAway"),
   spotlightNote: document.getElementById("spotlightNote"),
+  tweetText: document.getElementById("tweetText"),
+  tweetLink: document.getElementById("tweetLink"),
   toast: document.getElementById("toast"),
 };
 
 const API_BASE = "/api";
+const ANALYSIS_PENDING_TEXT = "Analysis in progress...";
 const SPECIALISTS = [
-  { key: "Specialist-Model", label: "Modele" },
-  { key: "Specialist-Form", label: "Forme" },
-  { key: "Specialist-Tactics", label: "Tactique" },
-  { key: "Specialist-Market", label: "Marche" },
-  { key: "Specialist-Players-Home", label: "Joueurs domicile" },
-  { key: "Specialist-Players-Away", label: "Joueurs exterieur" },
-  { key: "Specialist-Players-League", label: "Joueurs ligue" },
-  { key: "Specialist-Players", label: "Joueurs" },
+  { key: "Specialist-Model", label: "Model desk" },
+  { key: "Specialist-Form", label: "Form scout" },
+  { key: "Specialist-Tactics", label: "Tactics board" },
+  { key: "Specialist-Market", label: "Market watch" },
+  { key: "Specialist-Players-Home", label: "Home squad" },
+  { key: "Specialist-Players-Away", label: "Away squad" },
+  { key: "Specialist-Players-League", label: "League players" },
+  { key: "Specialist-Players", label: "Players" },
 ];
 
 const formatPercent = (value) => {
@@ -49,7 +53,7 @@ const formatPercent = (value) => {
 const formatTime = (iso) => {
   if (!iso) return "--";
   const date = new Date(iso);
-  return new Intl.DateTimeFormat("fr-FR", {
+  return new Intl.DateTimeFormat("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
@@ -70,10 +74,59 @@ const showToast = (message) => {
 const setBusy = (value) => {
   state.busy = value;
   if (value) {
-    els.analysisStatus.textContent = "Analyse en cours";
-  } else {
-    els.analysisStatus.textContent = "Pret";
+    els.analysisStatus.textContent = "Analyzing";
   }
+  if (els.analysisSpinner) {
+    els.analysisSpinner.classList.toggle("active", value);
+  }
+};
+
+const resetTweet = () => {
+  if (!els.tweetLink || !els.tweetText) return;
+  els.tweetText.textContent = "Generate an analysis to unlock your shareable tweet.";
+  els.tweetLink.href = "https://x.com/intent/tweet";
+  els.tweetLink.classList.add("disabled");
+  els.tweetLink.setAttribute("aria-disabled", "true");
+};
+
+const buildTweetText = ({ matchLabel, summary, probs, score }) => {
+  const parts = [];
+  parts.push(`Football: ${matchLabel}`);
+  if (summary) {
+    parts.push(`Lean: ${summary}`);
+  }
+  if (probs) {
+    const home = formatPercent(probs.home);
+    const draw = formatPercent(probs.draw);
+    const away = formatPercent(probs.away);
+    if (home !== "--" || draw !== "--" || away !== "--") {
+      parts.push(`1X2 ${home}/${draw}/${away}`);
+    }
+  }
+  if (score && score.length === 2) {
+    parts.push(`Likely ${score[0]}-${score[1]}`);
+  }
+  parts.push("Powered by AdoptanAI #football");
+  return parts.join(" | ");
+};
+
+const clampTweet = (text, max) => {
+  if (text.length <= max) return text;
+  return `${text.slice(0, max - 3).trim()}...`;
+};
+
+const updateTweet = ({ matchLabel, summary, probs, score }) => {
+  if (!els.tweetLink || !els.tweetText) return;
+  if (!matchLabel || !summary) {
+    resetTweet();
+    return;
+  }
+  let tweet = buildTweetText({ matchLabel, summary, probs, score });
+  tweet = clampTweet(tweet, 275);
+  els.tweetText.textContent = tweet;
+  els.tweetLink.href = `https://x.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
+  els.tweetLink.classList.remove("disabled");
+  els.tweetLink.removeAttribute("aria-disabled");
 };
 
 const updateSpotlight = (analysis) => {
@@ -81,14 +134,14 @@ const updateSpotlight = (analysis) => {
   const { home, away } = state.spotlight.teams;
   els.spotlightTitle.textContent = `${home.name} vs ${away.name}`;
   if (!analysis) {
-    els.spotlightStatus.textContent = "En attente";
+    els.spotlightStatus.textContent = "Standby";
     els.spotlightHome.textContent = "--";
     els.spotlightDraw.textContent = "--";
     els.spotlightAway.textContent = "--";
     return;
   }
   const probs = analysis?.predictions?.poisson_model?.["1x2_probabilities"] || {};
-  els.spotlightStatus.textContent = "Analyse OK";
+  els.spotlightStatus.textContent = "Analysis ready";
   els.spotlightHome.textContent = formatPercent(probs.home);
   els.spotlightDraw.textContent = formatPercent(probs.draw);
   els.spotlightAway.textContent = formatPercent(probs.away);
@@ -129,11 +182,11 @@ const renderExpertGrid = (parsed) => {
   });
 
   const presenter = parsed.Presenter
-    ? `<div class="expert-card"><h5>Presenter</h5><p>${parsed.Presenter}</p></div>`
+    ? `<div class="expert-card"><h5>Host</h5><p>${parsed.Presenter}</p></div>`
     : "";
 
   if (!cards.length && !presenter) {
-    els.expertGrid.innerHTML = "<div class=\"expert-empty\">Panel d'experts en attente.</div>";
+    els.expertGrid.innerHTML = "<div class=\"expert-empty\">Expert panel standing by.</div>";
     return;
   }
 
@@ -145,14 +198,18 @@ const renderAnalysis = (analysis, matchLabel) => {
   const probs = analysis?.predictions?.poisson_model?.["1x2_probabilities"] || {};
   const expected = analysis?.predictions?.poisson_model?.expected_goals || {};
   const score = analysis?.predictions?.poisson_model?.most_likely_score || [];
-  const expert = analysis?.expert_analysis || "Analyse IA indisponible.";
+  const expert = analysis?.expert_analysis || "AI analysis unavailable.";
   const parsed = parseExpertAnalysis(expert);
   const finalAdvice = parsed.Selector || parsed.Conseil || parsed.Final || "";
 
-  els.analysisSummary.textContent = finalAdvice ||
+  const summary =
+    finalAdvice ||
     analysis?.predictions?.api_sport?.advice ||
     analysis?.predictions?.api_sport?.prediction ||
-    "Predictions basees sur le modele Poisson et les statistiques recentes.";
+    "Signals from the Poisson model, form data, and market context.";
+
+  els.analysisSummary.textContent = summary;
+  els.analysisStatus.textContent = "Complete";
 
   els.probHome.textContent = formatPercent(probs.home);
   els.probDraw.textContent = formatPercent(probs.draw);
@@ -163,12 +220,13 @@ const renderAnalysis = (analysis, matchLabel) => {
   els.expertText.textContent = expert;
   renderExpertGrid(parsed);
   renderWarnings(analysis?.data_quality_warnings || []);
+  updateTweet({ matchLabel, summary, probs, score });
 };
 
 const renderExpertProgress = (panel) => {
   if (!panel) return;
   renderExpertGrid(panel);
-  if (panel.Selector && els.analysisSummary.textContent === "Analyse en cours...") {
+  if (panel.Selector && els.analysisSummary.textContent === ANALYSIS_PENDING_TEXT) {
     els.analysisSummary.textContent = panel.Selector;
   }
 };
@@ -188,7 +246,7 @@ const buildMatchCard = (fixture) => {
       <div class="match-meta">${league}${round} | ${time}</div>
     </div>
     <div class="match-actions">
-      <button>Analyser</button>
+      <button>Analyze</button>
     </div>
   `;
 
@@ -199,7 +257,7 @@ const buildMatchCard = (fixture) => {
 const renderFixtures = () => {
   els.fixturesList.innerHTML = "";
   if (!state.fixtures.length) {
-    els.fixturesList.innerHTML = "<p>Aucun match trouve pour aujourd'hui.</p>";
+    els.fixturesList.innerHTML = "<p>No matches found today.</p>";
     return;
   }
   state.fixtures.forEach((fixture) => {
@@ -208,7 +266,7 @@ const renderFixtures = () => {
 };
 
 const fetchFixtures = async () => {
-  els.fixturesMeta.textContent = "Chargement des fixtures...";
+  els.fixturesMeta.textContent = "Loading fixtures...";
   try {
     const response = await fetch(`${API_BASE}/fixtures/today`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -217,7 +275,7 @@ const fetchFixtures = async () => {
       return new Date(a.fixture.date) - new Date(b.fixture.date);
     });
     const count = state.fixtures.length;
-    els.fixturesMeta.textContent = `${count} matchs disponibles aujourd'hui.`;
+    els.fixturesMeta.textContent = `${count} matches available today.`;
     renderFixtures();
     state.spotlight = state.fixtures[0] || null;
     if (state.spotlight) {
@@ -228,22 +286,24 @@ const fetchFixtures = async () => {
     updateSpotlight();
   } catch (err) {
     console.error(err);
-    els.fixturesMeta.textContent = "Impossible de charger les matchs. Verifie l'API.";
-    showToast("Erreur de chargement des fixtures");
+    els.fixturesMeta.textContent = "Unable to load matches. Check the API.";
+    showToast("Fixture load failed");
   }
 };
 
 const analyzeFixture = async (fixture) => {
   if (state.busy) return;
   setBusy(true);
+  resetTweet();
   const home = fixture.teams.home;
   const away = fixture.teams.away;
   const matchLabel = `${home.name} vs ${away.name}`;
   els.analysisTitle.textContent = matchLabel;
-  els.analysisSummary.textContent = "Analyse en cours...";
-  els.expertText.textContent = "Chargement...";
+  els.analysisSummary.textContent = ANALYSIS_PENDING_TEXT;
+  els.analysisStatus.textContent = "Analyzing";
+  els.expertText.textContent = "Loading panel output...";
   if (els.expertGrid) {
-    els.expertGrid.innerHTML = "<div class=\"expert-empty\">Analyse en cours...</div>";
+    els.expertGrid.innerHTML = "<div class=\"expert-empty\">Panel is warming up...</div>";
   }
 
   const payload = {
@@ -252,7 +312,7 @@ const analyzeFixture = async (fixture) => {
     team_b_id: String(away.id),
     season_id: String(fixture.league.season),
     match_date: formatDate(fixture.fixture.date),
-    language: "fr",
+    language: "en",
   };
 
   try {
@@ -277,22 +337,24 @@ const analyzeFixture = async (fixture) => {
           if (state.spotlight && fixture.fixture.id === state.spotlight.fixture.id) {
             updateSpotlight(data.result);
           }
-          showToast("Analyse terminee");
+          showToast("Analysis complete");
           setBusy(false);
           return;
         }
         if (data.status === "error") {
-          throw new Error(data.error || "Analyse echouee.");
+          throw new Error(data.error || "Analysis failed.");
         }
         setTimeout(poll, 2000);
       } catch (err) {
         console.error(err);
-        els.analysisSummary.textContent = "Erreur pendant l'analyse. Reessaye plus tard.";
+        els.analysisSummary.textContent = "Analysis failed. Try again soon.";
+        els.analysisStatus.textContent = "Error";
         els.expertText.textContent = "--";
         if (els.expertGrid) {
-          els.expertGrid.innerHTML = "<div class=\"expert-empty\">Aucune analyse disponible.</div>";
+          els.expertGrid.innerHTML = "<div class=\"expert-empty\">No analysis available.</div>";
         }
-        showToast("Erreur d'analyse");
+        resetTweet();
+        showToast("Analysis error");
         setBusy(false);
       }
     };
@@ -300,12 +362,15 @@ const analyzeFixture = async (fixture) => {
     setTimeout(poll, 1500);
   } catch (err) {
     console.error(err);
-    els.analysisSummary.textContent = "Erreur pendant l'analyse. Reessaye plus tard.";
+    els.analysisSummary.textContent = "Analysis failed. Try again soon.";
+    els.analysisStatus.textContent = "Error";
     els.expertText.textContent = "--";
     if (els.expertGrid) {
-      els.expertGrid.innerHTML = "<div class=\"expert-empty\">Aucune analyse disponible.</div>";
+      els.expertGrid.innerHTML = "<div class=\"expert-empty\">No analysis available.</div>";
     }
-    showToast("Erreur d'analyse");
+    resetTweet();
+    showToast("Analysis error");
+    setBusy(false);
   }
 };
 
@@ -317,34 +382,33 @@ const loadSample = () => {
         "1x2_probabilities": { home: 0.46, draw: 0.28, away: 0.26 },
         most_likely_score: [2, 1],
       },
-      api_sport: { advice: "Victoire domicile avec prudence." },
+      api_sport: { advice: "Home win with coverage (1X) looks safe." },
     },
     expert_analysis: [
-      "Presenter: Analyse multi-angles basee sur les donnees du jour.",
-      "Specialist-Model: Avantage domicile sur la distribution des buts.",
-      "Specialist-Form: Equipe domicile en dynamique positive, defense stable.",
-      "Specialist-Tactics: Pressing haut et couloirs exploites, match controle.",
-      "Specialist-Market: Cotes encore jouables, edge modere.",
-      "Specialist-Players: Effectif domicile plus complet, impact key players.",
-      "Selector: Victoire domicile ou 1X en couverture.",
-    ].join("\\n"),
+      "Presenter: Multi-angle briefing based on today's data.",
+      "Specialist-Model: Home edge in goal distribution and xG.",
+      "Specialist-Form: Home side trending up with stable defense.",
+      "Specialist-Tactics: High press + wide overloads should control tempo.",
+      "Specialist-Market: Price still playable, moderate edge detected.",
+      "Specialist-Players: Home squad closer to full strength.",
+      "Selector: Home win or 1X as a cover.",
+    ].join("\n"),
   };
-  renderAnalysis(sample, "Exemple: Lyon vs Marseille");
+  renderAnalysis(sample, "Sample: Lyon vs Marseille");
   updateSpotlight(sample);
 };
 
 const analyzeSpotlight = () => {
   if (!state.spotlight) {
-    showToast("Aucun match disponible");
+    showToast("No matches available");
     return;
   }
   analyzeFixture(state.spotlight);
 };
 
-// Event bindings
-
 document.getElementById("refreshBtn").addEventListener("click", fetchFixtures);
 document.getElementById("analyzeFirstBtn").addEventListener("click", analyzeSpotlight);
 document.getElementById("openSampleBtn").addEventListener("click", loadSample);
 
+resetTweet();
 fetchFixtures();
