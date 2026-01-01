@@ -1,14 +1,15 @@
 :root {
-  --bg: #f5f0e8;
-  --ink: #12110f;
-  --muted: #5d5a52;
-  --accent: #ff5a3d;
-  --accent-dark: #c6402a;
-  --teal: #12b5a6;
-  --sun: #ffc857;
-  --card: #fffaf2;
-  --line: #e7dccd;
-  --shadow: 0 24px 70px rgba(18, 17, 15, 0.18);
+  color-scheme: light;
+  --bg: hsl(var(--background));
+  --ink: hsl(var(--foreground));
+  --muted: hsl(var(--muted-foreground));
+  --accent: hsl(var(--primary));
+  --accent-dark: hsl(var(--ring));
+  --teal: hsl(var(--accent));
+  --sun: hsl(var(--secondary));
+  --card: hsl(var(--card));
+  --line: hsl(var(--border));
+  --shadow: 0 24px 70px hsl(var(--foreground) / 0.14);
   --radius: 18px;
   --radius-lg: 28px;
   --font-title: "Space Grotesk", sans-serif;
@@ -47,20 +48,20 @@ body {
 .orb-a {
   top: -180px;
   left: -120px;
-  background: radial-gradient(circle at 30% 30%, #ffd1c2, transparent 70%);
+  background: radial-gradient(circle at 30% 30%, hsl(var(--primary) / 0.25), transparent 70%);
 }
 
 .orb-b {
   bottom: -180px;
   right: -160px;
-  background: radial-gradient(circle at 30% 30%, #baf2ea, transparent 70%);
+  background: radial-gradient(circle at 30% 30%, hsl(var(--accent) / 0.2), transparent 70%);
 }
 
 .grid {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(18, 17, 15, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(18, 17, 15, 0.05) 1px, transparent 1px);
+  background-image: linear-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.06) 1px, transparent 1px);
   background-size: 140px 140px;
   opacity: 0.35;
 }
@@ -92,7 +93,7 @@ body {
   height: 48px;
   border-radius: 16px;
   background: var(--accent);
-  color: #fff;
+  color: hsl(var(--background));
   font-weight: 700;
   font-family: var(--font-title);
   letter-spacing: 1px;
@@ -117,8 +118,8 @@ body {
 }
 
 .badge {
-  background: #12110f;
-  color: #fff;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
   padding: 6px 12px;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -146,7 +147,7 @@ button:disabled {
   border-radius: 999px;
   border: 1px solid var(--line);
   color: var(--ink);
-  background: rgba(255, 250, 242, 0.85);
+  background: hsl(var(--background) / 0.85);
 }
 
 .primary,
@@ -154,9 +155,9 @@ button:disabled {
   padding: 10px 18px;
   border-radius: 999px;
   background: var(--accent);
-  color: #fff;
+  color: hsl(var(--background));
   text-decoration: none;
-  box-shadow: 0 12px 30px rgba(255, 90, 61, 0.25);
+  box-shadow: 0 12px 30px hsl(var(--primary) / 0.25);
 }
 
 .hero-content {
@@ -196,7 +197,7 @@ button:disabled {
   padding: 12px;
   border-radius: 14px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--card);
 }
 
 .hero-stats span {
@@ -214,8 +215,8 @@ button:disabled {
   display: inline-block;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(18, 181, 166, 0.15);
-  color: var(--teal);
+  background: hsl(var(--accent) / 0.16);
+  color: var(--accent);
   font-weight: 600;
   font-size: 0.85rem;
   margin-bottom: 16px;
@@ -226,7 +227,7 @@ button:disabled {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow);
-  border: 1px solid rgba(231, 220, 205, 0.85);
+  border: 1px solid hsl(var(--border) / 0.75);
   animation: floatIn 0.8s ease forwards;
 }
 
@@ -252,7 +253,7 @@ button:disabled {
 .status {
   padding: 6px 10px;
   border-radius: 999px;
-  background: rgba(255, 90, 61, 0.1);
+  background: hsl(var(--primary) / 0.12);
   color: var(--accent-dark);
   font-size: 0.8rem;
 }
@@ -264,7 +265,7 @@ button:disabled {
 }
 
 .stat {
-  background: #fff;
+  background: var(--card);
   border-radius: 14px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -317,14 +318,14 @@ main {
 .agent-card {
   border-radius: var(--radius);
   padding: 18px;
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line);
-  box-shadow: 0 10px 30px rgba(18, 17, 15, 0.08);
+  box-shadow: 0 10px 30px hsl(var(--foreground) / 0.08);
 }
 
 .agent-card.active {
-  border-color: rgba(255, 90, 61, 0.5);
-  background: linear-gradient(135deg, #fff0e7 0%, #fffaf2 100%);
+  border-color: hsl(var(--primary) / 0.4);
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 100%);
 }
 
 .agent-card.muted {
@@ -343,8 +344,8 @@ main {
   font-size: 0.75rem;
   padding: 4px 8px;
   border-radius: 999px;
-  background: rgba(18, 181, 166, 0.12);
-  color: var(--teal);
+  background: hsl(var(--accent) / 0.15);
+  color: var(--accent);
 }
 
 .matchs-layout {
@@ -363,7 +364,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #fff;
+  background: var(--card);
   border-radius: var(--radius);
   padding: 16px 18px;
   border: 1px solid var(--line);
@@ -372,7 +373,7 @@ main {
 
 .match-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(18, 17, 15, 0.08);
+  box-shadow: 0 16px 30px hsl(var(--foreground) / 0.08);
 }
 
 .match-info {
@@ -400,7 +401,7 @@ main {
   padding: 8px 14px;
   border-radius: 999px;
   background: var(--teal);
-  color: #fff;
+  color: hsl(var(--background));
   font-size: 0.85rem;
 }
 
@@ -428,8 +429,8 @@ main {
   gap: 10px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(18, 181, 166, 0.12);
-  color: var(--teal);
+  background: hsl(var(--accent) / 0.14);
+  color: var(--accent);
   font-size: 0.8rem;
 }
 
@@ -437,7 +438,7 @@ main {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid rgba(18, 181, 166, 0.2);
+  border: 2px solid hsl(var(--accent) / 0.2);
   border-top-color: var(--teal);
   animation: spin 0.8s linear infinite;
   display: none;
@@ -453,8 +454,8 @@ main {
 }
 
 .analysis-block.highlight {
-  border: 1px solid rgba(255, 90, 61, 0.35);
-  background: #fff0e7;
+  border: 1px solid hsl(var(--primary) / 0.35);
+  background: hsl(var(--secondary));
   border-radius: 14px;
   padding: 12px;
 }
@@ -476,7 +477,7 @@ main {
 
 .prob-grid div,
 .detail-grid div {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 10px;
   border: 1px solid var(--line);
@@ -498,7 +499,7 @@ main {
 #expertText {
   white-space: pre-wrap;
   font-size: 0.9rem;
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -513,11 +514,11 @@ main {
 }
 
 .expert-card {
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
   padding: 12px;
   border: 1px solid var(--line);
-  box-shadow: 0 8px 20px rgba(18, 17, 15, 0.06);
+  box-shadow: 0 8px 20px hsl(var(--foreground) / 0.06);
 }
 
 .expert-card h5 {
@@ -543,14 +544,15 @@ main {
   justify-content: center;
   padding: 10px 14px;
   border-radius: 999px;
-  background: #111;
-  color: #fff;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
   text-decoration: none;
   margin-top: 8px;
 }
 
 .tweet.disabled {
-  background: #c9c2b8;
+  background: hsl(var(--muted) / 0.3);
+  color: hsl(var(--muted-foreground));
   pointer-events: none;
 }
 
@@ -560,7 +562,7 @@ main {
 
 .warnings ul {
   padding-left: 18px;
-  color: #a04a32;
+  color: hsl(var(--destructive));
   font-size: 0.85rem;
 }
 
@@ -575,11 +577,11 @@ main {
 }
 
 .method-card {
-  background: #fff;
+  background: var(--card);
   border-radius: 16px;
   padding: 18px;
   border: 1px solid var(--line);
-  box-shadow: 0 10px 24px rgba(18, 17, 15, 0.08);
+  box-shadow: 0 10px 24px hsl(var(--foreground) / 0.08);
 }
 
 .method-card h3 {
@@ -612,7 +614,7 @@ main {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #fff;
+  background: var(--card);
   border-radius: 999px;
   padding: 10px 18px;
   border: 1px solid var(--line);
