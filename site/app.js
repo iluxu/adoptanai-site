@@ -433,7 +433,7 @@ const loadSample = () => {
 
 const renderPolymarketResults = (data) => {
   if (!els.polyList) return;
-  const rows = data?.best_bets || data?.top || [];
+  const rows = Array.isArray(data?.best_bets) ? data.best_bets : [];
   els.polyCount.textContent = data?.markets_scanned ?? "--";
   els.polyAlerts.textContent = data?.alerts?.length ?? "--";
   if (els.polyScored) {
@@ -447,40 +447,100 @@ const renderPolymarketResults = (data) => {
     els.polyList.innerHTML = `<div class="poly-empty">No markets matched that scan.${note}</div>`;
     return;
   }
-  els.polyList.innerHTML = rows
-    .map((row) => {
-      const title = row.title || "Polymarket market";
-      const outcome = row.outcome || "";
-      const stale = row.stale_reason ? "Stale pricing" : "";
-      const panel = row.panel || {};
-      const recommendation = panel.recommendation || "NO_BET";
-      return `
-        <article class="poly-card">
-          <div class="poly-header">
-            <div>
-              <div class="poly-title">${title}</div>
-              <div class="poly-sub">Outcome: ${outcome}</div>
+  const aligned = rows.filter((row) => (row.panel?.recommendation || "NO_BET") !== "NO_BET");
+  const watchlist = rows.filter((row) => (row.panel?.recommendation || "NO_BET") === "NO_BET");
+
+  const renderCards = (list) =>
+    list
+      .map((row) => {
+        const title = row.title || "Polymarket market";
+        const outcome = row.outcome || "";
+        const stale = row.stale_reason ? "Stale pricing" : "";
+        const panel = row.panel || {};
+        const recommendation = panel.recommendation || "NO_BET";
+        const recClass =
+          recommendation === "FADE"
+            ? "fade"
+            : recommendation === "LEAN"
+            ? "lean"
+            : "neutral";
+        const alternatives = Array.isArray(row.alternatives) ? row.alternatives : [];
+        const altHtml = alternatives.length
+          ? `
+            <div class="poly-alt">
+              <span>Other outcomes</span>
+              <div class="poly-alt-list">
+                ${alternatives
+                  .map(
+                    (alt) => `
+                      <div class="poly-alt-item">
+                        <strong>${alt.outcome || "?"}</strong>
+                        <span>${formatPercent(alt.implied_prob)}</span>
+                      </div>
+                    `
+                  )
+                  .join("")}
+              </div>
             </div>
-            <div class="poly-score">${recommendation}</div>
-          </div>
-          ${stale ? `<div class="poly-stale">${stale}</div>` : ""}
-          ${panel.Selector ? `<div class="poly-selector">${panel.Selector}</div>` : ""}
-          <div class="poly-grid">
-            <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
-            <div><span>Edge</span><strong>${formatEdge(row.edge)}</strong></div>
-            <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
-            <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
-            <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
-          </div>
-          <div class="poly-panel">
-            <div><span>Pricing</span><p>${panel["Specialist-Pricing"] || "Pending pricing read."}</p></div>
-            <div><span>Momentum</span><p>${panel["Specialist-Momentum"] || "Pending momentum read."}</p></div>
-            <div><span>Risk</span><p>${panel["Specialist-Risk"] || "Pending risk read."}</p></div>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+          `
+          : "";
+        const llmLines = Array.isArray(panel.LLM) ? panel.LLM : [];
+        const llmHtml = llmLines.length
+          ? `
+            <div class="poly-llm">
+              ${llmLines.map((line) => `<p>${line}</p>`).join("")}
+            </div>
+          `
+          : "";
+        return `
+          <article class="poly-card">
+            <div class="poly-header">
+              <div>
+                <div class="poly-title">${title}</div>
+                <div class="poly-sub">Outcome: ${outcome}</div>
+              </div>
+              <div class="poly-score ${recClass}">${recommendation}</div>
+            </div>
+            ${stale ? `<div class="poly-stale">${stale}</div>` : ""}
+            ${panel.Selector ? `<div class="poly-selector">${panel.Selector}</div>` : ""}
+            <div class="poly-grid">
+              <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
+              <div><span>Edge</span><strong>${formatEdge(row.edge)}</strong></div>
+              <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
+              <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
+              <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
+            </div>
+            ${altHtml}
+            <div class="poly-panel">
+              <div><span>Pricing</span><p>${panel["Specialist-Pricing"] || "Pending pricing read."}</p></div>
+              <div><span>Momentum</span><p>${panel["Specialist-Momentum"] || "Pending momentum read."}</p></div>
+              <div><span>Risk</span><p>${panel["Specialist-Risk"] || "Pending risk read."}</p></div>
+              <div><span>Edge</span><p>${panel["Specialist-Edge"] || "No edge read."}</p></div>
+            </div>
+            ${llmHtml}
+          </article>
+        `;
+      })
+      .join("");
+
+  const alignedHtml = aligned.length
+    ? renderCards(aligned)
+    : "<div class=\"poly-empty\">No aligned bets yet. Expand the query or wait for live pricing.</div>";
+  const watchHtml = watchlist.length
+    ? `
+      <details class="poly-watchlist">
+        <summary>Watchlist (${watchlist.length})</summary>
+        <div class="poly-watchlist-body">${renderCards(watchlist)}</div>
+      </details>
+    `
+    : "";
+  els.polyList.innerHTML = `
+    <div class="poly-section">
+      <h3>Aligned bets</h3>
+      ${alignedHtml}
+    </div>
+    ${watchHtml}
+  `;
 };
 
 const scanPolymarket = async () => {
@@ -498,6 +558,7 @@ const scanPolymarket = async () => {
     max_markets: 80,
     open_only: openOnly,
     allow_stale: !openOnly,
+    llm: true,
   };
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {

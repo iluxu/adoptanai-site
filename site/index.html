@@ -16,8 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles/codex-theme.css?v=20260105" />
-    <link rel="stylesheet" href="./styles.css?v=20260105" />
+    <link rel="stylesheet" href="./styles/codex-theme.css?v=20260106" />
+    <link rel="stylesheet" href="./styles.css?v=20260106" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -52,6 +52,7 @@
         <div class="nav-actions">
           <span class="badge">100% free</span>
           <button class="ghost" id="refreshBtn">Refresh matches</button>
+          <a class="ghost" href="#polymarket">Open Polymarket</a>
           <a class="cta" href="#football">Open Football Agent</a>
         </div>
       </nav>
@@ -113,6 +114,37 @@
     </header>
 
     <main>
+      <section class="portal" id="portal">
+        <div class="section-title">
+          <h2>Choose your arena</h2>
+          <p>Pick the specialist agent you want to run right now.</p>
+        </div>
+        <div class="portal-grid">
+          <a class="portal-card football" href="#football">
+            <div class="portal-content">
+              <div class="portal-tag">Live agent</div>
+              <div class="portal-title">Football Intelligence</div>
+              <p class="portal-desc">
+                Match-level probabilities, tactical snapshots, and a multi-expert
+                synthesis for every fixture.
+              </p>
+              <div class="portal-cta">Enter Football →</div>
+            </div>
+          </a>
+          <a class="portal-card polymarket" href="#polymarket">
+            <div class="portal-content">
+              <div class="portal-tag">Live agent</div>
+              <div class="portal-title">Polymarket Sentinel</div>
+              <p class="portal-desc">
+                Read-only market scans, pricing signals, and aligned bets scored
+                by specialists.
+              </p>
+              <div class="portal-cta">Enter Polymarket →</div>
+            </div>
+          </a>
+        </div>
+      </section>
+
       <section class="agents">
         <div class="section-title">
           <h2>Agent lineup</h2>
@@ -236,7 +268,7 @@
       <section class="polymarket" id="polymarket">
         <div class="section-title">
           <h2>Polymarket Sentinel</h2>
-          <p>Live read-only intelligence across prediction markets. Scan, rank, and flag edges.</p>
+          <p>Live read-only intelligence across prediction markets. Scan, align, and brief every bet.</p>
         </div>
         <div class="polymarket-panel">
           <div class="polymarket-controls">
@@ -302,6 +334,6 @@
     </footer>
 
     <div class="toast" id="toast"></div>
-    <script src="./app.js?v=20260105"></script>
+    <script src="./app.js?v=20260106"></script>
   </body>
 </html>

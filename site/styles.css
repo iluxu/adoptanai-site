@@ -308,6 +308,85 @@ main {
   color: var(--muted);
 }
 
+.portal {
+  margin-bottom: 48px;
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.portal-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  text-decoration: none;
+  color: var(--ink);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, hsl(var(--portal-accent) / 0.35), transparent 60%),
+    linear-gradient(140deg, hsl(var(--background)) 0%, hsl(var(--secondary)) 100%);
+  opacity: 0.9;
+}
+
+.portal-card.football {
+  --portal-accent: 198 86% 55%;
+}
+
+.portal-card.polymarket {
+  --portal-accent: 32 92% 55%;
+}
+
+.portal-card .portal-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.portal-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: hsl(var(--portal-accent));
+}
+
+.portal-title {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+}
+
+.portal-desc {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.portal-cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: hsl(var(--portal-accent));
+}
+
 .agent-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -647,6 +726,12 @@ main {
   gap: 16px;
 }
 
+.poly-section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  font-family: var(--font-title);
+}
+
 .polymarket-metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -711,6 +796,21 @@ main {
   font-weight: 600;
 }
 
+.poly-score.lean {
+  background: hsl(var(--accent) / 0.18);
+  color: var(--accent);
+}
+
+.poly-score.fade {
+  background: hsl(var(--destructive) / 0.12);
+  color: hsl(var(--destructive));
+}
+
+.poly-score.neutral {
+  background: hsl(var(--muted) / 0.2);
+  color: var(--muted);
+}
+
 .poly-stale {
   font-size: 0.8rem;
   color: hsl(var(--muted-foreground));
@@ -746,6 +846,72 @@ main {
 .poly-panel p {
   font-size: 0.85rem;
   margin-top: 4px;
+}
+
+.poly-alt {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dashed var(--line);
+  background: hsl(var(--background));
+}
+
+.poly-alt span {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+
+.poly-alt-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.poly-alt-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+}
+
+.poly-llm {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: hsl(var(--secondary));
+  border-left: 3px solid var(--accent);
+}
+
+.poly-llm p {
+  margin: 4px 0;
+  font-size: 0.85rem;
+}
+
+.poly-watchlist {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: hsl(var(--card));
+}
+
+.poly-watchlist summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--font-title);
+}
+
+.poly-watchlist-body {
+  margin-top: 12px;
+  display: grid;
+  gap: 14px;
 }
 
 .poly-grid {
