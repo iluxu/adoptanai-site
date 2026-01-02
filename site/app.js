@@ -505,7 +505,8 @@ const renderPolymarketResults = (data) => {
             ${panel.Selector ? `<div class="poly-selector">${panel.Selector}</div>` : ""}
             <div class="poly-grid">
               <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
-              <div><span>Edge</span><strong>${formatEdge(row.edge)}</strong></div>
+              <div><span>Fair</span><strong>${formatPercent(row.fair_prob)}</strong></div>
+              <div><span>EV</span><strong>${formatEdge(row.ev)}</strong></div>
               <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
               <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
               <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
@@ -559,6 +560,7 @@ const scanPolymarket = async () => {
     open_only: openOnly,
     allow_stale: !openOnly,
     llm: true,
+    llm_fair: true,
   };
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {
