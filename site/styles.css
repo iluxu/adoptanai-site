@@ -618,6 +618,20 @@ main {
   color: hsl(var(--muted-foreground));
 }
 
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
 .polymarket-status {
   font-size: 0.85rem;
   color: var(--muted);

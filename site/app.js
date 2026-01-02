@@ -39,6 +39,7 @@ const els = {
   polyAlerts: document.getElementById("polyAlerts"),
   polyScored: document.getElementById("polyScored"),
   polyList: document.getElementById("polyList"),
+  polyOpenOnly: document.getElementById("polyOpenOnly"),
 };
 
 const API_BASE = "/api";
@@ -479,10 +480,12 @@ const scanPolymarket = async () => {
   }
   const query = els.polyQuery?.value?.trim() || null;
   const limitValue = parseInt(els.polyLimit?.value || "12", 10);
+  const openOnly = els.polyOpenOnly ? els.polyOpenOnly.checked : true;
   const payload = {
     query,
     limit: Number.isNaN(limitValue) ? 12 : limitValue,
     max_markets: 80,
+    open_only: openOnly,
   };
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {
