@@ -44,6 +44,7 @@ const els = {
 
 const API_BASE = "/api";
 const ANALYSIS_PENDING_TEXT = "Analysis in progress...";
+let polyStream = null;
 const SPECIALISTS = [
   { key: "Specialist-Model", label: "Model desk" },
   { key: "Specialist-Form", label: "Form scout" },
@@ -499,7 +500,7 @@ const renderPolymarketResults = (data) => {
           ? `${formatPercent(row.best_ask)} (${formatNumber(row.best_ask_size)})`
           : formatPercent(row.best_ask);
         return `
-          <article class="poly-card">
+          <article class="poly-card" data-token-id="${row.token_id || ""}">
             <div class="poly-header">
               <div>
                 <div class="poly-title">${title}</div>
@@ -510,14 +511,14 @@ const renderPolymarketResults = (data) => {
             ${stale ? `<div class="poly-stale">${stale}</div>` : ""}
             ${panel.Selector ? `<div class="poly-selector">${panel.Selector}</div>` : ""}
             <div class="poly-grid">
-              <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
-              <div><span>Fair</span><strong>${formatPercent(row.fair_prob)}</strong></div>
-              <div><span>EV</span><strong>${formatEdge(row.ev)}</strong></div>
-              <div><span>Best bid</span><strong>${bidText}</strong></div>
-              <div><span>Best ask</span><strong>${askText}</strong></div>
-              <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
-              <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
-              <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
+              <div><span>Implied</span><strong data-field="implied">${formatPercent(row.implied_prob)}</strong></div>
+              <div><span>Fair</span><strong data-field="fair">${formatPercent(row.fair_prob)}</strong></div>
+              <div><span>EV</span><strong data-field="ev">${formatEdge(row.ev)}</strong></div>
+              <div><span>Best bid</span><strong data-field="best_bid">${bidText}</strong></div>
+              <div><span>Best ask</span><strong data-field="best_ask">${askText}</strong></div>
+              <div><span>1h move</span><strong data-field="momentum">${formatEdge(row.momentum_1h)}</strong></div>
+              <div><span>Spread</span><strong data-field="spread">${formatEdge(row.spread)}</strong></div>
+              <div><span>Liquidity</span><strong data-field="liquidity">${formatNumber(row.liquidity)}</strong></div>
             </div>
             ${altHtml}
             <div class="poly-panel">
@@ -550,6 +551,53 @@ const renderPolymarketResults = (data) => {
     </div>
     ${watchHtml}
   `;
+  startPolymarketStream(rows);
+};
+
+const startPolymarketStream = (rows) => {
+  const tokenIds = rows.map((row) => row.token_id).filter(Boolean);
+  if (!tokenIds.length) return;
+  if (polyStream) {
+    polyStream.close();
+    polyStream = null;
+  }
+  const url = `${API_BASE}/polymarket/stream?token_ids=${encodeURIComponent(tokenIds.join(","))}`;
+  polyStream = new EventSource(url);
+  polyStream.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      updatePolymarketCard(payload);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  polyStream.onerror = () => {
+    if (polyStream) {
+      polyStream.close();
+      polyStream = null;
+    }
+  };
+};
+
+const updatePolymarketCard = (payload) => {
+  const tokenId = payload?.token_id;
+  if (!tokenId) return;
+  const card = document.querySelector(`.poly-card[data-token-id="${tokenId}"]`);
+  if (!card) return;
+  const setField = (field, value) => {
+    const el = card.querySelector(`[data-field="${field}"]`);
+    if (el) el.textContent = value;
+  };
+  const bidText = payload.best_bid_size
+    ? `${formatPercent(payload.best_bid)} (${formatNumber(payload.best_bid_size)})`
+    : formatPercent(payload.best_bid);
+  const askText = payload.best_ask_size
+    ? `${formatPercent(payload.best_ask)} (${formatNumber(payload.best_ask_size)})`
+    : formatPercent(payload.best_ask);
+  setField("implied", formatPercent(payload.mid));
+  setField("best_bid", bidText);
+  setField("best_ask", askText);
+  setField("momentum", formatEdge(payload.momentum_1h));
 };
 
 const scanPolymarket = async () => {
