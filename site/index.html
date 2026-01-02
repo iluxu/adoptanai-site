@@ -16,8 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles/codex-theme.css?v=20260101" />
-    <link rel="stylesheet" href="./styles.css?v=20260101" />
+    <link rel="stylesheet" href="./styles/codex-theme.css?v=20260102" />
+    <link rel="stylesheet" href="./styles.css?v=20260102" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -124,6 +124,11 @@
             <p>Predictions, probabilities, and multi-panel synthesis for each fixture.</p>
             <span class="agent-tag">Live</span>
           </div>
+          <div class="agent-card live">
+            <div class="agent-name">Polymarket Sentinel</div>
+            <p>Read-only market scans, orderbook pricing, and edge alerts.</p>
+            <span class="agent-tag">Live</span>
+          </div>
           <div class="agent-card muted">
             <div class="agent-name">Basketball</div>
             <p>Pace, player impact, and late lineup signals.</p>
@@ -228,6 +233,39 @@
         </div>
       </section>
 
+      <section class="polymarket" id="polymarket">
+        <div class="section-title">
+          <h2>Polymarket Sentinel</h2>
+          <p>Live read-only intelligence across prediction markets. Scan, rank, and flag edges.</p>
+        </div>
+        <div class="polymarket-panel">
+          <div class="polymarket-controls">
+            <div class="field">
+              <label for="polyQuery">Keywords</label>
+              <input id="polyQuery" type="text" placeholder="e.g. election, crypto, sports" />
+            </div>
+            <div class="field">
+              <label for="polyLimit">Top edges</label>
+              <select id="polyLimit">
+                <option value="6">6</option>
+                <option value="12" selected>12</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+            <button class="primary" id="polyScanBtn">Scan markets</button>
+            <div class="polymarket-status" id="polyStatus">Ready</div>
+            <p class="poly-note">Free tier: discovery, pricing, basic scoring, alerts. No trading.</p>
+          </div>
+          <div class="polymarket-results">
+            <div class="polymarket-metrics">
+              <div><span>Markets scanned</span><strong id="polyCount">--</strong></div>
+              <div><span>Alerts</span><strong id="polyAlerts">--</strong></div>
+            </div>
+            <div class="polymarket-list" id="polyList"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="method">
         <div class="section-title">
           <h2>How AdoptanAI works</h2>
@@ -259,6 +297,6 @@
     </footer>
 
     <div class="toast" id="toast"></div>
-    <script src="./app.js?v=20251231"></script>
+    <script src="./app.js?v=20260102"></script>
   </body>
 </html>

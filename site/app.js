@@ -2,6 +2,7 @@ const state = {
   fixtures: [],
   spotlight: null,
   busy: false,
+  polymarketBusy: false,
 };
 
 const els = {
@@ -30,6 +31,13 @@ const els = {
   tweetText: document.getElementById("tweetText"),
   tweetLink: document.getElementById("tweetLink"),
   toast: document.getElementById("toast"),
+  polyQuery: document.getElementById("polyQuery"),
+  polyLimit: document.getElementById("polyLimit"),
+  polyScanBtn: document.getElementById("polyScanBtn"),
+  polyStatus: document.getElementById("polyStatus"),
+  polyCount: document.getElementById("polyCount"),
+  polyAlerts: document.getElementById("polyAlerts"),
+  polyList: document.getElementById("polyList"),
 };
 
 const API_BASE = "/api";
@@ -48,6 +56,19 @@ const SPECIALISTS = [
 const formatPercent = (value) => {
   if (value === null || value === undefined) return "--";
   return `${Math.round(value * 100)}%`;
+};
+
+const formatEdge = (value) => {
+  if (value === null || value === undefined) return "--";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${(value * 100).toFixed(1)}%`;
+};
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return "--";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "--";
+  return new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 }).format(num);
 };
 
 const formatTime = (iso) => {
@@ -78,6 +99,16 @@ const setBusy = (value) => {
   }
   if (els.analysisSpinner) {
     els.analysisSpinner.classList.toggle("active", value);
+  }
+};
+
+const setPolymarketBusy = (value) => {
+  state.polymarketBusy = value;
+  if (els.polyStatus) {
+    els.polyStatus.textContent = value ? "Scanning..." : "Ready";
+  }
+  if (els.polyScanBtn) {
+    els.polyScanBtn.disabled = value;
   }
 };
 
@@ -398,6 +429,75 @@ const loadSample = () => {
   updateSpotlight(sample);
 };
 
+const renderPolymarketResults = (data) => {
+  if (!els.polyList) return;
+  const rows = data?.top || [];
+  els.polyCount.textContent = data?.markets_scanned ?? "--";
+  els.polyAlerts.textContent = data?.alerts?.length ?? "--";
+  if (!rows.length) {
+    els.polyList.innerHTML = "<div class=\"poly-empty\">No markets matched that scan.</div>";
+    return;
+  }
+  els.polyList.innerHTML = rows
+    .map((row) => {
+      const title = row.title || "Polymarket market";
+      const outcome = row.outcome || "";
+      return `
+        <article class="poly-card">
+          <div class="poly-header">
+            <div>
+              <div class="poly-title">${title}</div>
+              <div class="poly-sub">Outcome: ${outcome}</div>
+            </div>
+            <div class="poly-score">${formatEdge(row.score)}</div>
+          </div>
+          <div class="poly-grid">
+            <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
+            <div><span>Edge</span><strong>${formatEdge(row.edge)}</strong></div>
+            <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
+            <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
+            <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+};
+
+const scanPolymarket = async () => {
+  if (state.polymarketBusy) return;
+  setPolymarketBusy(true);
+  if (els.polyList) {
+    els.polyList.innerHTML = "<div class=\"poly-empty\">Scanning Polymarket...</div>";
+  }
+  const query = els.polyQuery?.value?.trim() || null;
+  const limitValue = parseInt(els.polyLimit?.value || "12", 10);
+  const payload = {
+    query,
+    limit: Number.isNaN(limitValue) ? 12 : limitValue,
+    max_markets: 80,
+  };
+  try {
+    const response = await fetch(`${API_BASE}/polymarket/scan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    renderPolymarketResults(data);
+    showToast("Polymarket scan ready");
+  } catch (err) {
+    console.error(err);
+    if (els.polyList) {
+      els.polyList.innerHTML = "<div class=\"poly-empty\">Scan failed. Try again.</div>";
+    }
+    showToast("Polymarket scan failed");
+  } finally {
+    setPolymarketBusy(false);
+  }
+};
+
 const analyzeSpotlight = () => {
   if (!state.spotlight) {
     showToast("No matches available");
@@ -409,6 +509,16 @@ const analyzeSpotlight = () => {
 document.getElementById("refreshBtn").addEventListener("click", fetchFixtures);
 document.getElementById("analyzeFirstBtn").addEventListener("click", analyzeSpotlight);
 document.getElementById("openSampleBtn").addEventListener("click", loadSample);
+if (els.polyScanBtn) {
+  els.polyScanBtn.addEventListener("click", scanPolymarket);
+}
+if (els.polyQuery) {
+  els.polyQuery.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      scanPolymarket();
+    }
+  });
+}
 
 resetTweet();
 fetchFixtures();
