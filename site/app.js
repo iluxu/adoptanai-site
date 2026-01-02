@@ -433,7 +433,7 @@ const loadSample = () => {
 
 const renderPolymarketResults = (data) => {
   if (!els.polyList) return;
-  const rows = data?.top || [];
+  const rows = data?.best_bets || data?.top || [];
   els.polyCount.textContent = data?.markets_scanned ?? "--";
   els.polyAlerts.textContent = data?.alerts?.length ?? "--";
   if (els.polyScored) {
@@ -443,7 +443,8 @@ const renderPolymarketResults = (data) => {
     els.polyStatus.textContent = data.note;
   }
   if (!rows.length) {
-    els.polyList.innerHTML = "<div class=\"poly-empty\">No markets matched that scan.</div>";
+    const note = data?.note ? ` ${data.note}` : "";
+    els.polyList.innerHTML = `<div class="poly-empty">No markets matched that scan.${note}</div>`;
     return;
   }
   els.polyList.innerHTML = rows
@@ -451,6 +452,8 @@ const renderPolymarketResults = (data) => {
       const title = row.title || "Polymarket market";
       const outcome = row.outcome || "";
       const stale = row.stale_reason ? "Stale pricing" : "";
+      const panel = row.panel || {};
+      const recommendation = panel.recommendation || "NO_BET";
       return `
         <article class="poly-card">
           <div class="poly-header">
@@ -458,15 +461,21 @@ const renderPolymarketResults = (data) => {
               <div class="poly-title">${title}</div>
               <div class="poly-sub">Outcome: ${outcome}</div>
             </div>
-            <div class="poly-score">${formatEdge(row.score)}</div>
+            <div class="poly-score">${recommendation}</div>
           </div>
           ${stale ? `<div class="poly-stale">${stale}</div>` : ""}
+          ${panel.Selector ? `<div class="poly-selector">${panel.Selector}</div>` : ""}
           <div class="poly-grid">
             <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
             <div><span>Edge</span><strong>${formatEdge(row.edge)}</strong></div>
             <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
             <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
             <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
+          </div>
+          <div class="poly-panel">
+            <div><span>Pricing</span><p>${panel["Specialist-Pricing"] || "Pending pricing read."}</p></div>
+            <div><span>Momentum</span><p>${panel["Specialist-Momentum"] || "Pending momentum read."}</p></div>
+            <div><span>Risk</span><p>${panel["Specialist-Risk"] || "Pending risk read."}</p></div>
           </div>
         </article>
       `;

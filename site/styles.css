@@ -721,6 +721,33 @@ main {
   background: hsl(var(--secondary));
 }
 
+.poly-selector {
+  font-size: 0.9rem;
+  color: var(--ink);
+  background: hsl(var(--secondary));
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.poly-panel {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.poly-panel span {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+
+.poly-panel p {
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
 .poly-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
