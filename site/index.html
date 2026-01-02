@@ -16,8 +16,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles/codex-theme.css?v=20260110" />
-    <link rel="stylesheet" href="./styles.css?v=20260110" />
+    <link rel="stylesheet" href="./styles/codex-theme.css?v=20260111" />
+    <link rel="stylesheet" href="./styles.css?v=20260111" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -282,6 +282,15 @@
                 <option value="6">6</option>
                 <option value="12" selected>12</option>
                 <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="polyCoverage">Coverage</label>
+              <select id="polyCoverage">
+                <option value="strict" selected>EV+++ strict</option>
+                <option value="wide">Wide scan</option>
               </select>
             </div>
             <label class="toggle">
@@ -334,6 +343,6 @@
     </footer>
 
     <div class="toast" id="toast"></div>
-    <script src="./app.js?v=20260110"></script>
+    <script src="./app.js?v=20260111"></script>
   </body>
 </html>

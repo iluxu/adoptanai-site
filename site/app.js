@@ -40,6 +40,7 @@ const els = {
   polyScored: document.getElementById("polyScored"),
   polyList: document.getElementById("polyList"),
   polyOpenOnly: document.getElementById("polyOpenOnly"),
+  polyCoverage: document.getElementById("polyCoverage"),
 };
 
 const API_BASE = "/api";
@@ -616,6 +617,7 @@ const scanPolymarket = async () => {
   const query = els.polyQuery?.value?.trim() || null;
   const limitValue = parseInt(els.polyLimit?.value || "12", 10);
   const openOnly = els.polyOpenOnly ? els.polyOpenOnly.checked : true;
+  const coverage = els.polyCoverage?.value || "strict";
   const payload = {
     query,
     limit: Number.isNaN(limitValue) ? 12 : limitValue,
@@ -625,6 +627,16 @@ const scanPolymarket = async () => {
     llm: true,
     llm_fair: true,
   };
+  if (coverage === "wide") {
+    payload.limit = Math.max(payload.limit || 0, 20);
+    payload.max_markets = 200;
+    payload.min_liquidity = 100;
+    payload.max_spread = 0.2;
+    payload.ev_min = 0.0;
+    payload.ev_strong = 0.02;
+    payload.ev_super = 0.04;
+    payload.llm_fair_max_markets = 20;
+  }
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {
       method: "POST",
