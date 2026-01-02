@@ -801,6 +801,16 @@ main {
   color: var(--accent);
 }
 
+.poly-score.strong {
+  background: hsl(var(--accent) / 0.3);
+  color: hsl(var(--accent));
+}
+
+.poly-score.super {
+  background: hsl(var(--primary) / 0.28);
+  color: hsl(var(--primary));
+}
+
 .poly-score.fade {
   background: hsl(var(--destructive) / 0.12);
   color: hsl(var(--destructive));

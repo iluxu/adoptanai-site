@@ -448,8 +448,8 @@ const renderPolymarketResults = (data) => {
     els.polyList.innerHTML = `<div class="poly-empty">No markets matched that scan.${note}</div>`;
     return;
   }
-  const aligned = rows.filter((row) => (row.panel?.recommendation || "NO_BET") !== "NO_BET");
-  const watchlist = rows.filter((row) => (row.panel?.recommendation || "NO_BET") === "NO_BET");
+  const aligned = rows.filter((row) => row.is_aligned);
+  const watchlist = rows.filter((row) => !row.is_aligned);
 
   const renderCards = (list) =>
     list
@@ -458,9 +458,15 @@ const renderPolymarketResults = (data) => {
         const outcome = row.outcome || "";
         const stale = row.stale_reason ? "Stale pricing" : "";
         const panel = row.panel || {};
-        const recommendation = panel.recommendation || "NO_BET";
+        const recommendation = row.edge_grade || panel.recommendation || "NO_BET";
         const recClass =
-          recommendation === "FADE"
+          recommendation === "EV+++"
+            ? "super"
+            : recommendation === "EV++"
+            ? "strong"
+            : recommendation === "EV+"
+            ? "lean"
+            : recommendation === "FADE"
             ? "fade"
             : recommendation === "LEAN"
             ? "lean"
@@ -514,6 +520,7 @@ const renderPolymarketResults = (data) => {
               <div><span>Implied</span><strong data-field="implied">${formatPercent(row.implied_prob)}</strong></div>
               <div><span>Fair</span><strong data-field="fair">${formatPercent(row.fair_prob)}</strong></div>
               <div><span>EV</span><strong data-field="ev">${formatEdge(row.ev)}</strong></div>
+              <div><span>EV adj</span><strong data-field="ev_adj">${formatEdge(row.ev_adj)}</strong></div>
               <div><span>Best bid</span><strong data-field="best_bid">${bidText}</strong></div>
               <div><span>Best ask</span><strong data-field="best_ask">${askText}</strong></div>
               <div><span>1h move</span><strong data-field="momentum">${formatEdge(row.momentum_1h)}</strong></div>
