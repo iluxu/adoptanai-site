@@ -811,6 +811,24 @@ main {
   color: hsl(var(--primary));
 }
 
+.poly-score.juicy {
+  background: hsl(var(--primary) / 0.18);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.35);
+}
+
+.poly-score.juicy-strong {
+  background: hsl(var(--primary) / 0.32);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.45);
+}
+
+.poly-score.juicy-super {
+  background: hsl(var(--primary) / 0.5);
+  color: hsl(var(--background));
+  border: 1px solid hsl(var(--primary) / 0.6);
+}
+
 .poly-score.fade {
   background: hsl(var(--destructive) / 0.12);
   color: hsl(var(--destructive));

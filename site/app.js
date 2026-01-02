@@ -450,12 +450,12 @@ const renderPolymarketResults = (data) => {
     return;
   }
   const sortByEv = (a, b) => {
-    const aScore = a.ev_adj ?? a.ev ?? a.score ?? -1;
-    const bScore = b.ev_adj ?? b.ev ?? b.score ?? -1;
+    const aScore = a.opportunity_score ?? a.ev_adj ?? a.ev ?? a.juicy_score ?? a.score ?? -1;
+    const bScore = b.opportunity_score ?? b.ev_adj ?? b.ev ?? b.juicy_score ?? b.score ?? -1;
     return bScore - aScore;
   };
-  const aligned = rows.filter((row) => row.is_aligned).sort(sortByEv);
-  const watchlist = rows.filter((row) => !row.is_aligned).sort(sortByEv);
+  const aligned = rows.filter((row) => row.is_aligned || row.is_juicy).sort(sortByEv);
+  const watchlist = rows.filter((row) => !(row.is_aligned || row.is_juicy)).sort(sortByEv);
 
   const renderCards = (list) =>
     list
@@ -464,7 +464,11 @@ const renderPolymarketResults = (data) => {
         const outcome = row.outcome || "";
         const stale = row.stale_reason ? "Stale pricing" : "";
         const panel = row.panel || {};
-        const recommendation = row.edge_grade || panel.recommendation || "NO_BET";
+        const juicyLabel =
+          row.juicy_label && row.juicy_label !== "NO_BET" ? row.juicy_label : null;
+        const evGrade =
+          row.edge_grade && row.edge_grade !== "NO_BET" ? row.edge_grade : null;
+        const recommendation = evGrade || juicyLabel || panel.recommendation || "NO_BET";
         const recClass =
           recommendation === "EV+++"
             ? "super"
@@ -472,6 +476,12 @@ const renderPolymarketResults = (data) => {
             ? "strong"
             : recommendation === "EV+"
             ? "lean"
+            : recommendation === "JUICY+++"
+            ? "juicy-super"
+            : recommendation === "JUICY++"
+            ? "juicy-strong"
+            : recommendation === "JUICY+"
+            ? "juicy"
             : recommendation === "FADE"
             ? "fade"
             : recommendation === "LEAN"
@@ -512,6 +522,11 @@ const renderPolymarketResults = (data) => {
         const askText = row.best_ask_size
           ? `${formatPercent(row.best_ask)} (${formatNumber(row.best_ask_size)})`
           : formatPercent(row.best_ask);
+        const juicyScore =
+          row.juicy_score != null ? `${row.juicy_score.toFixed(2)}` : "--";
+        const volume24h = row.volume_24h != null ? formatNumber(row.volume_24h) : "--";
+        const orderFlow =
+          row.order_imbalance != null ? formatEdge(row.order_imbalance) : "--";
         return `
           <article class="poly-card" data-token-id="${row.token_id || ""}">
             <div class="poly-header">
@@ -528,11 +543,14 @@ const renderPolymarketResults = (data) => {
               <div><span>Fair${fairLabel}</span><strong data-field="fair">${formatPercent(row.fair_prob)}</strong></div>
               <div><span>EV</span><strong data-field="ev">${formatEdge(row.ev)}</strong></div>
               <div><span>EV adj</span><strong data-field="ev_adj">${formatEdge(row.ev_adj)}</strong></div>
+              <div><span>Juicy</span><strong>${juicyLabel || "--"} ${juicyScore}</strong></div>
               <div><span>Best bid</span><strong data-field="best_bid">${bidText}</strong></div>
               <div><span>Best ask</span><strong data-field="best_ask">${askText}</strong></div>
               <div><span>1h move</span><strong data-field="momentum">${formatEdge(row.momentum_1h)}</strong></div>
               <div><span>Spread</span><strong data-field="spread">${formatEdge(row.spread)}</strong></div>
               <div><span>Liquidity</span><strong data-field="liquidity">${formatNumber(row.liquidity)}</strong></div>
+              <div><span>Vol 24h</span><strong>${volume24h}</strong></div>
+              <div><span>Flow</span><strong data-field="order_flow">${orderFlow}</strong></div>
             </div>
             ${altHtml}
             <div class="poly-panel">
@@ -560,7 +578,7 @@ const renderPolymarketResults = (data) => {
     : "";
   els.polyList.innerHTML = `
     <div class="poly-section">
-      <h3>Aligned bets</h3>
+      <h3>Aligned bets (EV / Juicy)</h3>
       ${alignedHtml}
     </div>
     ${watchHtml}
@@ -612,6 +630,12 @@ const updatePolymarketCard = (payload) => {
   setField("best_bid", bidText);
   setField("best_ask", askText);
   setField("momentum", formatEdge(payload.momentum_1h));
+  if (payload.best_bid_size != null || payload.best_ask_size != null) {
+    const bidSize = Number(payload.best_bid_size) || 0;
+    const askSize = Number(payload.best_ask_size) || 0;
+    const imbalance = bidSize + askSize > 0 ? (bidSize - askSize) / (bidSize + askSize) : 0;
+    setField("order_flow", formatEdge(imbalance));
+  }
 };
 
 const scanPolymarket = async () => {
@@ -632,6 +656,9 @@ const scanPolymarket = async () => {
     allow_stale: !openOnly,
     llm: true,
     llm_fair: true,
+    juicy_min: 1.0,
+    juicy_strong: 1.1,
+    juicy_super: 1.2,
   };
   if (coverage === "wide") {
     payload.limit = Math.max(payload.limit || 0, 20);
@@ -642,6 +669,9 @@ const scanPolymarket = async () => {
     payload.ev_strong = 0.02;
     payload.ev_super = 0.04;
     payload.llm_fair_max_markets = 20;
+    payload.juicy_min = 0.32;
+    payload.juicy_strong = 0.45;
+    payload.juicy_super = 0.6;
   } else if (coverage === "aggressive") {
     payload.limit = Math.max(payload.limit || 0, 50);
     payload.max_markets = 400;
@@ -651,6 +681,21 @@ const scanPolymarket = async () => {
     payload.ev_strong = 0.02;
     payload.ev_super = 0.03;
     payload.llm_fair_max_markets = 30;
+    payload.juicy_min = 0.28;
+    payload.juicy_strong = 0.4;
+    payload.juicy_super = 0.55;
+  } else if (coverage === "juicy") {
+    payload.limit = Math.max(payload.limit || 0, 60);
+    payload.max_markets = 500;
+    payload.min_liquidity = 25;
+    payload.max_spread = 0.5;
+    payload.ev_min = 0.0;
+    payload.ev_strong = 0.01;
+    payload.ev_super = 0.02;
+    payload.llm_fair_max_markets = 20;
+    payload.juicy_min = 0.25;
+    payload.juicy_strong = 0.38;
+    payload.juicy_super = 0.52;
   }
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {
