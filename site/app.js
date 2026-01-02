@@ -492,6 +492,12 @@ const renderPolymarketResults = (data) => {
             </div>
           `
           : "";
+        const bidText = row.best_bid_size
+          ? `${formatPercent(row.best_bid)} (${formatNumber(row.best_bid_size)})`
+          : formatPercent(row.best_bid);
+        const askText = row.best_ask_size
+          ? `${formatPercent(row.best_ask)} (${formatNumber(row.best_ask_size)})`
+          : formatPercent(row.best_ask);
         return `
           <article class="poly-card">
             <div class="poly-header">
@@ -507,6 +513,8 @@ const renderPolymarketResults = (data) => {
               <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
               <div><span>Fair</span><strong>${formatPercent(row.fair_prob)}</strong></div>
               <div><span>EV</span><strong>${formatEdge(row.ev)}</strong></div>
+              <div><span>Best bid</span><strong>${bidText}</strong></div>
+              <div><span>Best ask</span><strong>${askText}</strong></div>
               <div><span>1h move</span><strong>${formatEdge(row.momentum_1h)}</strong></div>
               <div><span>Spread</span><strong>${formatEdge(row.spread)}</strong></div>
               <div><span>Liquidity</span><strong>${formatNumber(row.liquidity)}</strong></div>
