@@ -37,6 +37,7 @@ const els = {
   polyStatus: document.getElementById("polyStatus"),
   polyCount: document.getElementById("polyCount"),
   polyAlerts: document.getElementById("polyAlerts"),
+  polyScored: document.getElementById("polyScored"),
   polyList: document.getElementById("polyList"),
 };
 
@@ -434,6 +435,12 @@ const renderPolymarketResults = (data) => {
   const rows = data?.top || [];
   els.polyCount.textContent = data?.markets_scanned ?? "--";
   els.polyAlerts.textContent = data?.alerts?.length ?? "--";
+  if (els.polyScored) {
+    els.polyScored.textContent = data?.outcomes_scored ?? "--";
+  }
+  if (data?.note && els.polyStatus) {
+    els.polyStatus.textContent = data.note;
+  }
   if (!rows.length) {
     els.polyList.innerHTML = "<div class=\"poly-empty\">No markets matched that scan.</div>";
     return;
