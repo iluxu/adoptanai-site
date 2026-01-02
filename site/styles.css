@@ -711,6 +711,16 @@ main {
   font-weight: 600;
 }
 
+.poly-stale {
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  background: hsl(var(--secondary));
+}
+
 .poly-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));

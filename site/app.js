@@ -450,6 +450,7 @@ const renderPolymarketResults = (data) => {
     .map((row) => {
       const title = row.title || "Polymarket market";
       const outcome = row.outcome || "";
+      const stale = row.stale_reason ? "Stale pricing" : "";
       return `
         <article class="poly-card">
           <div class="poly-header">
@@ -459,6 +460,7 @@ const renderPolymarketResults = (data) => {
             </div>
             <div class="poly-score">${formatEdge(row.score)}</div>
           </div>
+          ${stale ? `<div class="poly-stale">${stale}</div>` : ""}
           <div class="poly-grid">
             <div><span>Implied</span><strong>${formatPercent(row.implied_prob)}</strong></div>
             <div><span>Edge</span><strong>${formatEdge(row.edge)}</strong></div>
@@ -486,6 +488,7 @@ const scanPolymarket = async () => {
     limit: Number.isNaN(limitValue) ? 12 : limitValue,
     max_markets: 80,
     open_only: openOnly,
+    allow_stale: !openOnly,
   };
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {
