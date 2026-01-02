@@ -472,6 +472,7 @@ const renderPolymarketResults = (data) => {
             : recommendation === "LEAN"
             ? "lean"
             : "neutral";
+        const fairLabel = row.fair_prob_source ? ` (${row.fair_prob_source})` : "";
         const alternatives = Array.isArray(row.alternatives) ? row.alternatives : [];
         const altHtml = alternatives.length
           ? `
@@ -519,7 +520,7 @@ const renderPolymarketResults = (data) => {
             ${panel.Selector ? `<div class="poly-selector">${panel.Selector}</div>` : ""}
             <div class="poly-grid">
               <div><span>Implied</span><strong data-field="implied">${formatPercent(row.implied_prob)}</strong></div>
-              <div><span>Fair</span><strong data-field="fair">${formatPercent(row.fair_prob)}</strong></div>
+              <div><span>Fair${fairLabel}</span><strong data-field="fair">${formatPercent(row.fair_prob)}</strong></div>
               <div><span>EV</span><strong data-field="ev">${formatEdge(row.ev)}</strong></div>
               <div><span>EV adj</span><strong data-field="ev_adj">${formatEdge(row.ev_adj)}</strong></div>
               <div><span>Best bid</span><strong data-field="best_bid">${bidText}</strong></div>
