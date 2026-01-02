@@ -449,8 +449,13 @@ const renderPolymarketResults = (data) => {
     els.polyList.innerHTML = `<div class="poly-empty">No markets matched that scan.${note}</div>`;
     return;
   }
-  const aligned = rows.filter((row) => row.is_aligned);
-  const watchlist = rows.filter((row) => !row.is_aligned);
+  const sortByEv = (a, b) => {
+    const aScore = a.ev_adj ?? a.ev ?? a.score ?? -1;
+    const bScore = b.ev_adj ?? b.ev ?? b.score ?? -1;
+    return bScore - aScore;
+  };
+  const aligned = rows.filter((row) => row.is_aligned).sort(sortByEv);
+  const watchlist = rows.filter((row) => !row.is_aligned).sort(sortByEv);
 
   const renderCards = (list) =>
     list
@@ -637,6 +642,15 @@ const scanPolymarket = async () => {
     payload.ev_strong = 0.02;
     payload.ev_super = 0.04;
     payload.llm_fair_max_markets = 20;
+  } else if (coverage === "aggressive") {
+    payload.limit = Math.max(payload.limit || 0, 50);
+    payload.max_markets = 400;
+    payload.min_liquidity = 50;
+    payload.max_spread = 0.35;
+    payload.ev_min = 0.005;
+    payload.ev_strong = 0.02;
+    payload.ev_super = 0.03;
+    payload.llm_fair_max_markets = 30;
   }
   try {
     const response = await fetch(`${API_BASE}/polymarket/scan`, {
